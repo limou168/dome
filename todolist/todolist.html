@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none
+        }
+        
+        body {
+            background-color: rgb(168, 168, 168);
+        }
+        
+        .nav {
+            height: 60px;
+            background-color: rgb(24, 22, 22);
+            color: white;
+        }
+        
+        .div {
+            width: 600px;
+            margin: 0 auto;
+            line-height: 60px;
+        }
+        
+        .log {
+            font-size: 25px;
+        }
+        
+        .input {
+            height: 25px;
+            width: 350px;
+            margin-left: 130px;
+            border-radius: 5px;
+        }
+        
+        .p {
+            font-size: 25px;
+            font-weight: 700;
+        }
+        /* .span {
+            background-color: white;
+            border-radius: 50%;
+            font-size: 15px;
+            color: rgb(146, 146, 146);
+            margin-left: 480px;
+        } */
+        
+        .span {
+            display: inline-block;
+            margin-left: 480px;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #E6E6FA;
+            line-height: 22px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        li {
+            margin-top: 5px;
+            background-color: white;
+            width: 600px;
+            height: 30px;
+            border-radius: 3px;
+            position: relative;
+            border-left: 5px solid red;
+        }
+        
+        .dwli {
+            margin-top: 5px;
+            background-color: white;
+            width: 600px;
+            height: 30px;
+            border-radius: 3px;
+            position: relative;
+            border-left: 5px solid #ccc;
+        }
+        
+        li>input {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+        }
+        
+        .dwin {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 22px;
+            height: 22px;
+            color: red;
+            background-color: red;
+        }
+        
+        .val {
+            position: absolute;
+            top: -15px;
+            left: 40px;
+        }
+        
+        a {
+            position: absolute;
+            top: 3px;
+            left: 570px;
+            width: 13px;
+            height: 13px;
+            background-color: #CCC;
+            border-radius: 50%;
+            border: 6px double #FFF;
+        }
+        
+        .c {
+            color: rgb(109, 109, 109);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <div class="div">
+            <span class="log">ToDOList</span>
+            <input type="text" placeholder="添加ToDo" class="input">
+        </div>
+    </div>
+    <div>
+        <div class="div">
+            <p class="p">正在进行<span class="span dolist">0</span></p>
+            <ol>
+                <!-- <li><input type="checkbox">
+                    <span class="val">撒大苏打</span>
+                    <a href=""></a>
+                </li> -->
+            </ol>
+            <p class="p">已经完成<span class="span tolist">0</span></p>
+            <ul>
+                <!-- <li class="dwli"><input type="checkbox" class="dwin">
+                    <span class="val c">撒大苏打</span>
+                    <a href=""></a>
+                </li> -->
+            </ul>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            load()
+            $(".input").on("keydown", function(event) {
+                if (event.keyCode === 13) {
+                    if ($(this).val() === "") {
+                        alert("请输入内容！！")
+                    } else {
+                        //获取本地数据
+                        var local = getData()
+                            //追加数据
+                        local.push({
+                                title: $(this).val(),
+                                done: false
+                            })
+                            //保存
+                        seveData(local)
+                            //加载
+                        load();
+                        $(this).val("")
+                    }
+
+                }
+            })
+
+            //删除
+            $("ol,ul").on("click", "a", function() {
+                var data = getData()
+                var index = $(this).attr("id")
+                console.log(index);
+                data.splice(index, 1)
+                seveData(data)
+                load()
+            })
+
+            $("ol,ul").on("click", "input", function() {
+                var data = getData()
+                var index = $(this).siblings("a").attr("id")
+                data[index].done = $(this).prop("checked")
+                seveData(data)
+                load()
+            })
+
+            function getData() {
+                var data = localStorage.getItem("list")
+                if (data !== null) {
+                    return JSON.parse(data)
+                } else {
+                    return []
+                }
+            }
+            //保存
+            function seveData(data) {
+                localStorage.setItem("list", JSON.stringify(data))
+            }
+            //加载数据
+            function load() {
+                var data = getData();
+                // console.log(data);
+                $("ol ,ul").empty()
+                var tolist = 0
+                var dolist = 0
+                $.each(data, function(i, n) {
+                    if (n.done) {
+                        $("ul").prepend("<li class='dwli'><input type='checkbox' checked='checked' ><span class='val'>" + n.title + "</span><a id=" + i + "></a></li > ")
+                        tolist++
+                    } else {
+                        $("ol").prepend("<li ><input type='checkbox'  ><span class='val'>" + n.title + "</span><a id=" + i + "></a></li > ")
+                        dolist++
+                    }
+                })
+                $(".tolist").text(tolist)
+                $(".dolist").text(dolist)
+
+
+
+
+
+
+            }
+
+        })
+    </script>
+</body>
+
+</html>
